@@ -13,8 +13,9 @@ use crate::api::{
 
 use super::serveradmin_converter::ServeradminConverter;
 
+#[derive(Clone)]
 pub struct ServeradminDataApi {
-    sa_converter: ServeradminConverter,
+    pub sa_converter: ServeradminConverter,
 }
 
 impl ServeradminDataApi {

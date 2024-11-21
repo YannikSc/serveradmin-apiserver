@@ -2,10 +2,12 @@ use std::collections::HashMap;
 
 pub type AnySpec = HashMap<String, serde_json::Value>;
 
-#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
+#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
 pub struct CommonMeta {
+    #[serde(skip_serializing_if = "String::is_empty")]
     pub api_version: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
     pub kind: String,
 }
 
@@ -13,9 +15,32 @@ pub struct CommonMeta {
 #[serde(rename_all = "camelCase")]
 pub struct CommonMetadata {
     pub name: String,
+    #[serde(skip_serializing_if = "String::is_empty")]
     pub namespace: String,
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub labels: HashMap<String, serde_json::Value>,
+    #[serde(skip_serializing_if = "HashMap::is_empty")]
     pub annotations: HashMap<String, serde_json::Value>,
+    #[serde(flatten, default)]
+    pub _other: serde_json::Value,
+}
+
+#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
+pub struct AnyManifest {
+    #[serde(flatten)]
+    pub type_meta: CommonMeta,
+    pub metadata: CommonMetadata,
+    pub spec: AnySpec,
+    #[serde(flatten)]
+    pub _other: serde_json::Value,
+}
+
+#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
+pub struct AnyList<I> {
+    #[serde(flatten)]
+    pub type_meta: CommonMeta,
+    pub metadata: CommonMetadata,
+    pub items: Vec<I>,
     #[serde(flatten)]
     pub _other: serde_json::Value,
 }
@@ -127,5 +152,14 @@ impl<T: serde::Serialize> MetaTable<T> {
                 })
                 .collect::<anyhow::Result<Vec<_>>>()?,
         })
+    }
+}
+
+impl CommonMeta {
+    pub fn new_serveradmin(kind: impl ToString) -> Self {
+        Self {
+            api_version: "serveradmin.innogames.de/v1".to_string(),
+            kind: kind.to_string(),
+        }
     }
 }

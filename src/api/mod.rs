@@ -1,4 +1,5 @@
 pub mod kube_common;
+pub mod serveradmin_common;
 
 #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
 pub struct RequestContext {
