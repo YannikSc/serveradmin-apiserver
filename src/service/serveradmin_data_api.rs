@@ -31,7 +31,12 @@ impl ServeradminDataApi {
         config.ssh_signer = None;
         config.auth_token = Some(request.token.clone());
 
-        let mut query = Query::builder().filter("servertype", servertype);
+        let mut query = Query::builder()
+            .restrict(
+                self.sa_converter
+                    .get_attribute_names_for_servertype(&servertype),
+            )
+            .filter("servertype", servertype);
 
         if !metadata.namespace.is_empty() {
             query = query.filter("project", metadata.namespace.clone());

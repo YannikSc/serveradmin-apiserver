@@ -25,7 +25,11 @@ impl FromRequestParts<App> for Authorization {
         };
 
         Ok(Self {
-            token: authorization.to_str().unwrap_or_default().to_string(),
+            token: authorization
+                .to_str()
+                .unwrap_or_default()
+                .trim_start_matches("Bearer ")
+                .to_string(),
         })
     }
 }

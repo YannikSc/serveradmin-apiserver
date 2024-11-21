@@ -1,28 +1,51 @@
-#[derive(Clone, Debug, serde::Deserialize, PartialEq, serde::Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum AttributeType {
-    Domain,   // -> String
-    Date,     // -> String
-    Number,   // -> Number
-    Inet,     // -> String
-    Supernet, // -> String
-    Macaddr,  // -> String
-    Boolean,  // -> Boolean
-    Relation, // -> String
-    String,   // -> String
-    Datetime, // -> Date
-    Reverse,  // -> ?
+pub enum PredefinedColumn<'a> {
+    Always(&'a str),
+    Detailed(&'a str),
 }
 
-#[derive(Clone, Debug)]
-pub struct Attribute {
-    pub name: String,
-    pub r#type: AttributeType,
-    pub reversed_attribute_id: String,
-    pub multi: bool,
-    pub regexp: String,
-    pub readonly: bool,
-    pub hovertext: String,
-    pub required: bool,
-    pub default: String,
+impl<'a> PredefinedColumn<'a> {
+    pub fn get_name(&self) -> &'a str {
+        match self {
+            PredefinedColumn::Always(name) => name,
+            PredefinedColumn::Detailed(name) => name,
+        }
+    }
 }
+
+const VISIBLE_ATTRIBUTES: &[(&str, &[PredefinedColumn])] = &[
+    (
+        "vm",
+        &[
+            PredefinedColumn::Always("hostname"),
+            PredefinedColumn::Always("state"),
+            PredefinedColumn::Always("ipv6"),
+            PredefinedColumn::Always("ipv4"),
+            PredefinedColumn::Always("hypervisor"),
+            PredefinedColumn::Detailed("service_groups"),
+            PredefinedColumn::Detailed("loadbalancer"),
+            PredefinedColumn::Detailed("route_network"),
+            PredefinedColumn::Detailed("project_network"),
+        ],
+    ),
+    (
+        "service_group",
+        &[
+            PredefinedColumn::Always("hostname"),
+            PredefinedColumn::Always("state"),
+            PredefinedColumn::Always("protocol_ports_inbound"),
+            PredefinedColumn::Always("protocol_ports_outbound"),
+            PredefinedColumn::Always("service_group_members"),
+        ],
+    ),
+    (
+        "loadbalancer",
+        &[
+            PredefinedColumn::Always("hostname"),
+            PredefinedColumn::Always("state"),
+            PredefinedColumn::Always("ipv6"),
+            PredefinedColumn::Always("ipv4"),
+            PredefinedColumn::Detailed("lb_nodes"),
+            PredefinedColumn::Detailed("route_network"),
+        ],
+    ),
+];

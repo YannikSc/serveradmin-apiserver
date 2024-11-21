@@ -1,0 +1,251 @@
+attribute_id,type,reversed_attribute_id,multi,regexp,readonly,hovertext
+allow_from_reverse,reverse,allow_from,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+allow_to_reverse,reverse,allow_to,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+vlan_interface_of,reverse,vlan_interfaces,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+monitoring_workers,reverse,monitoring_queues,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+rack_height,number,,false,\A[0-9]+\Z,false,
+no_logging,boolean,,false,\A(true|false)\Z,false,To disable logging of traffic on firewall
+gateway_type,string,,false,\A.*\Z,false,
+vrrp_id,number,,false,\A(0|[1-9][0-9]*)\Z,false,This is VHID for CARP or VRID for VRRP.
+internal_gateway_vhid,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+table_priority,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+network_zones,string,,true,\A.*\Z,false,"A zone defining routing and firewall rules, a kind of sub-datacenter. It is a multi attribute for ""network_zone"""
+allow_to,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,If set on any server in a segment it will block all access from servers in this segment to the internet unless they are explicitly given a value here.
+backup_pool,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,The name of another LB Pool to which the traffic for this one should be redirected once there is no active node left.
+protocol_port,string,,true,\A((any|esp|ah)|((tcp|udp)([0-9]+([lt]+)?|[0-9]+(-[0-9]+)?(_[0-9]+)?))|((ping)|((tcp|udp)([0-9]+t?(-[0-9]+)?))))\Z,true,Ports and protocols to be forwarded to Nodes belonging to this LB Pool.
+serial_number,string,,false,\A[a-zA-Z0-9\-]+\Z,false,"A unique string identifying hardware, like:
+- Dell ServiceTag
+- Memory module serial number
+- Disk WWN address"
+ipmi,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+internal_gateway,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+sg_allow_to,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+switchports,string,,true,\A.*\Z,false,Switchports attribute is used by Foreman to configure switches. That includes creating proper LAGGs and assigning VLANs to them. 
+vlan_networks,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+dhcp_networks,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+public_networks,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+storage_hardware,string,,true,\A(raid|adaptec|threeware|perc700|perc710|perc730|perc310|perc330|perc200|sas1068|non-raid)\Z,false,The type of the raid controller if installed
+apt_repository_url,string,,false,"\A([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\Z",false,Debian repository URL for apt e.g. update.innogames.de which will be used to form the entries in /etc/apt/sources.list together with repositories attribute.
+bladecenter,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+monitoring_queue,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,Set the gearman_queue for a route_network
+default_snat,boolean,,false,\A(true|false)\Z,false,
+symmetric_nat,boolean,,false,\A(true|false)\Z,false,This attribute will create a rule causing any Nodes belonging to this Pool to use its IP address for outgoing NAT.
+provider_asn,number,,false,\A[0-9]+\Z,false,
+vms,reverse,hypervisor,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+lb_nodes,reverse,loadbalancer,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+ipmi_of,reverse,ipmi,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+acl_members,reverse,acl,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+project_domain,domain,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+capacity,number,,false,\A[0-9]+\Z,false,Capacity of a memory or a storage module. Measured in B.
+igvm_locked,datetime,,false,\A.*\Z,false,"Set when object is being manipulated by igvm, e.g. being build or migrated."
+instance,number,,false,\A[0-9]+\Z,false,used to index multiple instances of the same function
+snat_lb_pool,relation,,false,\A.*\Z,false,LB Pool used for providing default SNAT for IPv4.
+backup_pool_of,reverse,backup_pool,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+service_groups,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+sg_allow_from,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+sg_allow_to_reverse,reverse,sg_allow_to,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+monitoring_group_members,string,,true,\A.*\Z,false,
+backup_storage,string,,false,\A.*\Z,false,Storage server for the host's backups. This is normally auto-filled by the system while doing the first backup. Changes needs a puppet run on both the host and new storage.
+network_zone,string,,false,\A.*\Z,false,"A zone defining routing and firewall rules, a kind of sub-datacenter."
+order_id,string,,true,\A.*\Z,false,"some reference to the ticked, bill or order for this one"
+iggop_locked,boolean,,false,\A(true|false)\Z,false,The object or a related object is worked on by iggop and should not be used.
+cpu_util_pct_tmp,number,,false,"\A(0|[1-9]{1,2})\Z",true,
+lb_multihoming,string,,false,\A(primary|secondary|noauto)\Z,false,Decide which datacenter is to be used as primary one for LB Pool of this LB Node.
+io_weight,string,,false,\A(default|low)\Z,false,"Defines the I/O weight for a VM, setting this to low means other VMs on the same Hypervisor will get preferred I/O."
+monitoring_networks,reverse,monitoring_queue,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,shows the route_networks for a gearman_queue
+route_network,supernet,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+sshfp,string,,true,\A[1-4] (1 [0-9a-f]{40}|2 [0-9a-f]{64})\Z,false,
+hc_type,string,,false,\A(dns|http|https|ping|postgres|tcp)\Z,false,
+security_confidentiality,string,,false,\A(L|M|H|C)\Z,false,
+project_network,supernet,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+provider_network,supernet,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+os_product_license,string,,false,\A.*\Z,false,
+arch,string,,false,\A.*\Z,false,
+assigned_to,string,,false,\A.*\Z,false,
+hc_dbname,string,,false,\A.*\Z,false,
+datacenter,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+hypervisor_standby,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,Hostname of the Hypervisor on which hot copy of this VM resides
+subproject,string,,false,\A[a-z][a-z0-9]+\Z,false,
+security_integrity,string,,false,\A(L|M|H|C)\Z,false,
+security_availability,string,,false,\A(L|M|H|C)\Z,false,
+legal_personal_data,string,,false,\A(nothing|personal|highly_personal)\Z,false,
+hw_loadbalancer_group,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+loadbalancer,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,A list of LB Pools to which this Node belongs.
+auto_update,boolean,,false,\A(true|false)\Z,false,This is used by automated scripts to decide if this server should be automatically updated in certain situations
+ipv4_only,boolean,,false,\A(true|false)\Z,false,
+nessus_scan_id,number,,false,\A[0-9]+\Z,false,The id of the scan in nessus
+hc_port,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+hc_interval,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+tunnel_interfaces,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+rack_position,number,,false,\A[0-9]+\Z,false,
+memory,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+hc_user,string,,false,\A.*\Z,false,
+hc_host,string,,false,\A.*\Z,false,
+hc_query,string,,false,\A.*\Z,false,
+game_world,number,,false,\A(0|[1-9][0-9]*)\Z,false,The numerical part of the world id for games 0 is reserved for master or servers with market wide functionality
+domain,relation,,true,\A(\*\.)?([a-z0-9]+(\.|-+))*[a-z0-9]+\Z,false,list of all domains which are assigned to this server or load balancer
+firmware_versions,string,,true,\A(BMC|BIOS|MIDPLANE)_[0-9a-z\.]+\Z,false,Versions of various firmware components. See regexp for notation and supported attributes.
+cpu_clock_mhz,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+provisioning_step,string,,false,\A([a-z0-9]+[_])*[a-z0-9]+\|([a-z0-9]+[\.\-])*[a-z0-9]+\|\d{10}\|\d{10}\.\d{6}\Z,false,
+max_nodes,number,,false,\A(0|[1-9][0-9]*)\Z,false,Maximum number of nodes serving pool's traffic even if more are alive.
+provider,relation,,false,\A.*\Z,false,
+sg_allow_from_reverse,reverse,sg_allow_from,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+barman_host,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+bladecenter_slot,string,,true,\A.*\Z,false,
+installed_in,relation,,false,\A[a-z0-9\-\.]+\Z,false,A physical device in which the hardware component is installed.
+restic_keep_daily,number,,false,\A[1-9][0-9]?$|^100\Z,false,"Daily backup count to keep for this host, 1-100"
+hypervisor,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,Hostname of the Hypervisor on which this VM resides
+min_nodes_action,string,,false,\A(force_down|force_up|backup_pool)\Z,false,"force_down: switch to backup_pool if active nodes drop below min_nodes
+force_up: always send traffic to last min_nodes hosts, even if they are considered offline"
+monitoring_groups,relation,,true,\A.*\Z,false,
+responsible_admin,string,,true,\A[a-z][a-z\._]+[a-z]\Z,false,
+cpu_model,string,,false,\A.*\Z,false,
+function,string,,false,\A.*\Z,false,Function of host
+harddisk_type,string,,false,\A(ssd|hdd|unknown)\Z,false,this is either hdd or ssd to give an indication on the performance and io scheduler to be used
+repositories_host,string,,false,"\A([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}\Z",false,"Repositories hostname to fetch packages from. On Debian this is where apt fetches debian packages from (aptly). For FreeBSD this is where pkg fetches FreeBSD packages from.
+It is used to form the correct configs on the hosts."
+letsencrypt_enabled,boolean,,false,\A(true|false)\Z,false,"If you enable this for a public domain, our helper tool will try to generate a letsencrypt certificate for this domain and put it into puppet/acmekeys repo (& keep it up-to-date)."
+load_avg,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+iops_avg,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+cpu_util_pct,number,,false,"\A(0|[1-9]{1,2})\Z",true,
+game_type,string,,false,\A.*\Z,false,"Currently only used to mark Tribalwars Speed (s), Classic (c), and Casual (p) special worlds"
+fixup_enabled,boolean,,false,\A(true|false)\Z,false,
+hardware_components,reverse,installed_in,true,\A.*\Z,true,
+served_game,string,,false,\A.*\Z,false,Like game_market used to group (backend) servers for one/multiple game(s)
+served_markets,string,,true,\A.*\Z,false,Like game_market used to group (backend) servers for multiple market(s)
+aws_vpc_id,string,,false,\Avpc-[a-z0-9]+\Z,false,Aws VpcId
+monitoring_satellite_of,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,icinga2
+service_group_members,reverse,service_groups,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+provider_domain,domain,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+disk_size_gib,number,,false,\A(0|[1-9][0-9]*)\Z,false,"This is the current disk size of the server in gibibytes.  It should be filled while the VM is created or maintained by other scripts.
+"
+num_cpu,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+repositories,string,,true,\A\w+:\w+:\w+\Z,false,
+datacenter_colo,string,,false,\A.*\Z,false,
+parent_bond,relation,,false,\A.*\Z,false,
+memory_modules,string,,true,\A.*\Z,false,
+hc_max_failed,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+acl,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+powerports,string,,true,\A.*\Z,false,
+min_nodes,number,,false,\A(0|[1-9][0-9]*)\Z,false,"Minimum number of alive hosts required. If number goes below this value, min_nodes_action is checked"
+state_limit,number,,false,\A(0|[1-9][0-9]*)\Z,false,Maximum amount of states which can be created by traffic to this LB Pool. Any new traffic above this number will be silently dropped.
+hc_timeout,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+hc_ok_codes,number,,true,\A(0|[1-9][0-9]*)\Z,false,
+group_company,string,,false,\A[a-zA-Z]+\Z,false,"Company this host is serving e.g. Hutch, Congregate (Default: InnoGames)"
+rack_row,string,,false,\A.*\Z,false,
+rack_colo,string,,false,\A.*\Z,false,
+rack_number,string,,false,\A.*\Z,false,
+puppet_classes,string,,true,\A[a-z][a-z0-9_]*(::[a-z][a-z0-9_]*)*\Z,false,
+environment,string,,false,\A(testing|staging|production)\Z,false,
+primary_ip6,inet,,false,\A[^\.]+\Z,false,
+game_market,string,,false,\A[a-z][a-z]|foe|war\Z,false,"The 2 letter short code for the game market, see docu for allowed values."
+description,string,,false,\A.*\Z,false,Intended to give an external auditor a very general idea of what the system is about.
+puppet_disabled,boolean,,false,\A(true|false)\Z,false,
+no_monitoring,boolean,,false,\A(true|false)\Z,false,if set to true this server will be ignored by the nagios generation script
+vlan_tag,number,,false,\A(0|[1-9][0-9]*)\Z,false,
+routing_table,number,,false,\A(0|[1-9][0-9]*)\Z,false,Number of routing table used for routing to and from this subnet
+project,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+mx,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+health_checks,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+rack,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+vlan_interfaces,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+dell_servicetag,string,,true,\A.*\Z,false,The Service Tag for Dell to be used in the support interface and to identify the hardware
+puppet_environment,string,,false,\A(?!(testing|staging|production))[a-z][a-z0-9_]+\Z,false,
+default_gateway,relation,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+bond_no,string,,false,\A.*\Z,false,
+puppet_master,string,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+hardware_type,string,,false,\A.*\Z,false,"mandatory field on all objects such as amp, beamer, recorder etc."
+responsible_external,string,,true,\A.*\Z,false,extern company who monitory/maintains device or system
+access_uri,string,,true,\A(ssh://|ipv4://|ipv6:|https://|http://).*\Z,false,URI to access the device
+backup_disabled,boolean,,false,\A(true|false)\Z,false,Set to true if you do not want this server backed up.
+mac,macaddr,,true,\A.*\Z,false,
+monitoring_checks,string,,true,\A[a-z][a-z0-9_\-@]*\Z,false,
+graphite_graphs,string,,true,\A[a-z][a-z0-9_\.\-]*\Z,false,a list of graphs to reference which graphs should be displayed on this server to be used in the collections (doku link).
+cpu_util_vm_pct,number,,false,\A(0|[1-9][0-9]*)\Z,true,Show the maximum vCPU usage of the last 7 days
+nessus_folder_name,string,,false,\A(.*)\Z,false,The name of the nessus scan that includes this project_network
+order_date,date,,false,\A.*\Z,false,"When this server was ordered, for warranty and to find the order"
+tunnel_interface_of,reverse,tunnel_interfaces,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+aws_image_id,string,,false,\A(ami-)([a-z0-9]+)\Z,false,AWS ImageID
+aws_instance_id,string,,false,\Ai-[a-z0-9]+\Z,false,AWS InstanceId
+aws_instance_type,string,,false,\A[acimrptxz][0-9]+[a|d|n|e]?\.[0-9]*x?(large|micro)\Z,false,AWS InstanceType
+backup_maxage,number,,false,\A(0|[1-9][0-9]*)\Z,false,"The expected freshness of the latest registered backup of the host. Defaults to 24 hours. If you have multiple backup windows, you might consider lowering this. 0 is a special value, disables backup age checking completely."
+aws_security_group_ids,string,,true,\Asg-[a-z0-9]+\Z,false,AWS SecurityGroupIds
+aws_subnet_id,string,,false,\Asubnet-[a-z0-9]+\Z,false,AWS SubnetId
+responsible_internal,string,,true,\A.*\Z,false,business owner
+datacenter_type,relation,,false,\A(aws|digitalocean|hetzner|hyperv|kvm)\.dct\Z,false,
+hc_drain_codes,number,,true,\A(0|[1-9][0-9]*)\Z,false,
+hidden_primary,boolean,,false,\A(true|false)\Z,false,If true the domain is served by one of our external DNS providers (e.g. INWX) to the world and our Nameserver act as hidden master.
+event_tracking_code,string,,false,\A([a-z0-9]+)\Z,false,
+protocol_ports_inbound,string,,true,\A((esp|ah|ping)|((tcp|udp)([0-9]+)(-[0-9]+)?([lt]+)?))\Z,false,
+is_game,boolean,,false,\A(true|false)\Z,false,
+jira_project,string,,false,\A([A-Z]+)\Z,false,
+project_english_name,string,,false,\A[a-zA-Z0-9 ]+\Z,false,
+short_code,string,,false,\A([a-z]+)\Z,false,
+slack_channel,string,,false,\A(#[a-z0-9_-]+)\Z,false,
+support_code,string,,false,\A([a-z0-9]+)\Z,false,
+restic_keep_monthly,number,,false,\A[1-9][0-9]?$|^100\Z,false,"Monthly backup count to keep for this host, 1-100"
+igvm_action,string,,false,\A(build|migrate|migrate_offline|in_progress|successful|failed)\Z,false,Current state of VM for IGVM daemon
+aws_placement,string,,true,\A(ap|ca|eu|me|sa|us)\-(central|east|north|northeast|south|west)\-[1-9][a-z]\Z,false,AWS Placement
+restic_group,string,,false,\A[a-z0-9][a-z0-9-]+[a-z0-9]\Z,false,"Name of the backup bucket of this server, project (+ ""-subproject"" if defined) when empty by default"
+aws_key_name,string,,false,\A[a-zA-Z0-9@-]+\Z,false,AWS KeyName
+protocol_ports_outbound,string,,true,\A((esp|ah|ping)|((tcp|udp)([0-9]+)(-[0-9]+)?([lt]+)?))\Z,false,
+restic_keep_last,number,,false,\A([1-3][0-9][0-9]|[0-9][0-9]|[0-9])\Z,false,"Latest backup count to keep for this host, 1-399"
+restic_keep_weekly,number,,false,\A[1-9][0-9]?$|^100\Z,false,"Weekly backup count to keep for this host, 1-100"
+restic_keep_yearly,number,,false,\A[0-9]$|^10\Z,false,"Yearly backup count to keep for this host, 1-10"
+puppet_ca,string,,false,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,specifies the puppet ca server which the server should use
+lb_pool,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,A list of LB Pools to which this Node belongs.
+monitoring_queues,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,gearman_queues a worker should be responsible for
+igvm_migration_log,string,,true,"\A[0-9]{10}\s[-|+][0-9]{1,3}\Z",false,Log for IGVM migrations to properly calculate the destination load of a hypervisor.
+internal_domain,relation,,false,\A(\*\.)?([a-z0-9]+(\.|-+))*[a-z0-9]+\Z,false,
+internal,boolean,,false,\A.*\Z,false,
+backup_window,string,,true,\A\d+-\d+\Z,false,"This is a list of hour ranges (in CEST) when the backup should be scheduled on the server locally. E.g. ""3-4"" means create one backup between 03:00 and 04:00. The backups will be transferred in order of backup_prio attribute once the local script ran through and reported a success so not guaranteed to be within the backup_window (but mostly does fit in)."
+memory_usage_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+load_99,number,,false,\A(-?[0-9]+)\Z,true,
+libvirt_pool_used_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+libvirt_pool_total_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+libvirt_pool_free_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+libvirt_memory_used_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+libvirt_memory_total_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+libvirt_memory_free_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+cpu_perffactor,number,,false,\A[0-9]+\Z,true,
+backup_state,string,,false,\A(idle|local_backup_running|local_backup_done|local_backup_failed|restic_running|restic_failed|waiting_local_backup_start|please_backup_now|dead)\Z,false,"Current state of the backup. Used by backup system, might not be always 100% accurate (by design)."
+powa_enabled,boolean,,false,\A(true|false)\Z,false,"True if Powa is enabled on the host. This attribute is managed by puppet, don't set it manually."
+lb_pool_nodes,reverse,lb_pool,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,
+backup_timestamp,datetime,,false,\A.*\Z,false,"Last action time of backup system (UTC). Should be set automatically by backup manager.
+We're utilizing this like a cache to quickly check the freshness of the state (real source of truth is the client itself, but not always)."
+os,string,,false,\A(android|cumulus|centos64|wheezy|jessie|stretch|buster|bullseye|bookworm|bionic|freebsd_[0-9]+\.[0-9]+|macos_.*|tvos|other|esx|ciscoios|ios12.2|iDRAC6|windows(2022_std|2019_std|2019_dc|2016_std|2016_dc|2012r2_std|2012r2_dc|2012_std|2012_dc|2008r2_std|2008r2_dc|7|8|10|11))\Z,false,"Operation system, e.g. wheezy, jessie or freebsd100 or macos_*"
+ospf_active,boolean,,false,\A(true|false)\Z,false,Make routers having vlan_interfaces in this network active in OSPF.
+network_type,string,,false,\A(loopback|transit_(internal_igp|public_(hwlbs|uplink|igp))|public|internal|public_dmz|vpn_clients|internal_vpn_clients|cloud)\Z,false,"Select what kind of connection you want to switch
+single: single interface without lacp or anything other special
+bond_ab: Bonding without LACP but 2 links with failover
+bond_lacp: bonding with lacp and 2 active links"
+network_autoconfiguration,string,,false,\A(none|dhcp_static|dhcp_dynamic)\Z,false,"Configure automatic assignment of IP addresses of devices in this network:
+- none - no RAs, no DHCP
+- dhcp_static - no SLAAC due to RAs send without the ""auto"" flag, DHCPv4 and DHCPv6 only with entries from Serveradmin
+- dhcp_dynamic - SLAAC due to RAs send with the ""auto"" flag, DHCPv4 and DHCPv6 with entries from Serveradmin and from dynamic pool"
+sentry_team,string,,false,\A.*\Z,false,Sentry team name at sentry.io
+disk_free_gib,number,,false,\A(0|[1-9][0-9]*)\Z,true,
+state,string,,false,\A(retired|maintenance|cold_standby|deploy_offline|deploy_online|online_reserved|online)\Z,false,"Retired: No DNS, no Nagios, lb downtimed
+Maintenance: DNS, Nagios downtimed, lb downtimed
+Deploy_offline: DNS, Nagios active, lb downtimed
+Deploy_online: DNS, Nagios downtimed, lb active
+Online: DNS, Nagios active, lb active"
+routed_networks,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,false,
+backup_canshrink,boolean,,false,\A(true|false)\Z,false,"Monitoring system will warn in case last backup size of the host drops below 50% of its last 10 backups' median size. Set this to true if you expect a shrinking backup (e.g. on ""speed worlds"" which are reset from time to time) so it doesn't complain on suddenly shrinking backup size."
+network_link_type,string,,false,\A(kernel|ovs)_(single|bond_lacp|bond_ab)\Z,false,The type of physical connection between the hardware server and switches. The first part either 'ovs' if you use OpenVSwitch or 'kernel' if it's just plain Linux/Windows. Second part is either 'single' for devices with a single network cable or 'bond_ab' or 'bond_lacp' for servers with redundant network link.
+officetool_id,string,,false,\Ai?[0-9]+\Z,false,
+backup_prio,number,,false,\A(0|[1-9][0-9]*)\Z,false,"Backup priority of the host. Defaults to 300. Backups will be eventually processed regardless of the value of this, but higher number means the dump and transfer of the backup will be prioritized."
+allow_from,relation,,true,\A(\*\.)?([a-z0-9]+[\.\-])*[a-z0-9]+\Z,true,List of Access lists from which access to this LB Pool is allowed. Connections from outside of allowed networks will be silently dropped.
+hardware_model,string,,false,\A.*\Z,false,
+dns_ns,string,,true,\A(?:(?:[a-z01-9\-]*[a-z01-9]\.)+(?:[a-z]+))\Z,false,
+dns_txt,string,,true,\A.*\Z,false,
+dns_soa,string,,false,\A([a-zA-Z0-9-.]+\.)\s+([a-zA-Z0-9-.]+\.)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\Z,false,
+loadbalancer_nodes,reverse,domain,true,\A.*\Z,true,
+dns_mx,string,,true,\A.+\Z,false,
+dns_cname,string,,false,\A(?:(?:[a-zA-Z01-9\-]*[a-zA-Z01-9]\.)+(?:[a-z]+))\Z,false,
+dns_spf,string,,false,\A.+\Z,false,"SPF DNS record:
+prio, weight, port, target
+
+Example:
+10 0 5269 jabber.innogames.de"
+dns_srv,string,,true,\A\d+\s\d+\s\d+\s[a-zA-Z0-9.-]+\Z,false,SRV DNS record

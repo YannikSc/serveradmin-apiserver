@@ -28,7 +28,7 @@ async fn list_namespaces(
         .data_api
         .list_resources(
             &ctx,
-            &CommonMeta::new_serveradmin("Namespace"),
+            &CommonMeta::new_serveradmin("Project"),
             &Default::default(),
         )
         .await
@@ -446,14 +446,14 @@ pub fn router() -> axum::Router<crate::App> {
         .route("/apis", get(get_apis))
         .route("/api/v1", get(get_api_resources))
         .route(
-            "/apis/serveradmin.innogames.de/v1",
+            "/apis/serveradmin.innogames.de",
             get(get_serveradmin_api_group),
         )
         .route(
             "/apis/serveradmin.innogames.de/v1",
             get(get_serveradmin_api_resources),
         )
-        .route("/api/namespaces", get(list_namespaces))
+        .route("/api/v1/namespaces", get(list_namespaces))
         .route(
             "/apis/serveradmin.innogames.de/v1/namespaces/:namespace/:plural",
             get(list_resources).post(create_resource),
