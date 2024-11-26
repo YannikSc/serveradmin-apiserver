@@ -20,6 +20,7 @@ checksum = "512761e0bb2578dd7380c6baaa0f4ce03e84f95e960231d1dec8bf4d7d6e2627"
 [[package]]
 name = "adminapi"
 version = "0.1.0"
+source = "git+https://github.com/YannikSc/serveradmin.git#d6c24d5adc40ee74bb8a650ad1416c3c4aabdbf3"
 dependencies = [
  "anyhow",
  "hmac",
