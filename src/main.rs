@@ -37,8 +37,9 @@ async fn main() -> anyhow::Result<()> {
         .nest("/openapi", controller::openapi::router())
         .with_state(app);
 
+    let listen_addr = std::env::var("LISTEN_ADDR").unwrap_or_else(|_| String::from("127.0.0.1:8080"));
     axum::serve(
-        tokio::net::TcpListener::bind("127.0.0.1:8081").await?,
+        tokio::net::TcpListener::bind(listen_addr).await?,
         router.into_make_service(),
     )
     .await?;
