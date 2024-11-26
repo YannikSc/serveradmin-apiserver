@@ -1,7 +1,11 @@
 [package]
 name = "serveradmin-apiserver"
+description = "A Kubernetes compatible API server for InnoGames' Serveradmin tool"
 version = "0.1.0"
 edition = "2021"
+authors = ["Yannik_Sc <yannik@yannik-sc.de>"]
+license = "MIT"
+readme = "README.md"
 
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
