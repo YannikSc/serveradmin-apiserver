@@ -8,7 +8,7 @@ use axum::{
 
 use crate::{
     api::{
-        kube_common::{AnyManifest, CommonMeta, CommonMetadata},
+        kube_common::{AnyManifest, CommonMeta, CommonMetadata, UpdateBody},
         RequestContext,
     },
     request::{Accept, Authorization},
@@ -194,6 +194,7 @@ async fn get_resource(
             },
         )
         .await
+        .and_then(|server| app.kube_converter.server_to_manifest(server))
         .map_err(|err| {
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -262,6 +263,7 @@ async fn create_resource(
     app.data_api
         .create_resource(&ctx, &type_meta, &metadata, &spec)
         .await
+        .and_then(|server| app.kube_converter.server_to_manifest(server))
         .map_err(|err| {
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -288,12 +290,7 @@ async fn update_resource(
     app: State<App>,
     authorization: Authorization,
     Path((namespace, plural, hostname)): Path<(String, String, String)>,
-    Json(AnyManifest {
-        type_meta,
-        metadata,
-        spec,
-        ..
-    }): Json<AnyManifest>,
+    Json(UpdateBody { spec, .. }): Json<UpdateBody>,
 ) -> Result<Response, Response> {
     let ctx = RequestContext {
         token: authorization.token.clone(),
@@ -306,41 +303,16 @@ async fn update_resource(
         )
             .into_response());
     };
-    let expected_type = app.kube_converter.servertype_to_common_meta(&servertype);
-    if type_meta.ne(&expected_type) {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            app.kube_converter.error_status_response(
-                400,
-                "The requested type does not match the manifest. Aborting.",
-            ),
-        )
-            .into_response());
-    }
-    if namespace.ne(&metadata.namespace) {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            app.kube_converter.error_status_response(
-                400,
-                "The request does not match the resource namespace. Aborting.",
-            ),
-        )
-            .into_response());
-    }
-    if hostname.ne(&metadata.name) {
-        return Err((
-            StatusCode::BAD_REQUEST,
-            app.kube_converter.error_status_response(
-                400,
-                "The request does not match the resource hostname. Aborting.",
-            ),
-        )
-            .into_response());
-    }
-
+    let type_meta = app.kube_converter.servertype_to_common_meta(&servertype);
+    let metadata = CommonMetadata {
+        namespace: namespace.clone(),
+        name: hostname.clone(),
+        ..Default::default()
+    };
     app.data_api
         .update_resource(&ctx, &type_meta, &metadata, &spec)
         .await
+        .and_then(|server| app.kube_converter.server_to_manifest(server))
         .map_err(|err| {
             (
                 StatusCode::INTERNAL_SERVER_ERROR,
@@ -357,7 +329,7 @@ async fn update_unscoped_resource(
     app: State<App>,
     authorization: Authorization,
     Path((plural, hostname)): Path<(String, String)>,
-    json: Json<AnyManifest>,
+    json: Json<UpdateBody>,
 ) -> Result<Response, Response> {
     update_resource(
         app,

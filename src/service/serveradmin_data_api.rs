@@ -54,6 +54,9 @@ impl ServeradminDataApi {
         metadata: &CommonMetadata,
     ) -> anyhow::Result<Server<Dataset>> {
         let servertype = self.sa_converter.kind_to_servertype(&type_meta.kind);
+        let attributes = self
+            .sa_converter
+            .get_attribute_names_for_servertype(&servertype);
 
         let mut config = Config::build_from_environment()?;
         config.ssh_signer = None;
@@ -61,7 +64,8 @@ impl ServeradminDataApi {
 
         let mut query = Query::builder()
             .filter("servertype", servertype)
-            .filter("hostname", metadata.name.clone());
+            .filter("hostname", metadata.name.clone())
+            .restrict(attributes);
 
         if !metadata.namespace.is_empty() {
             query = query.filter("project", metadata.namespace.clone());

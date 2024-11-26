@@ -45,6 +45,13 @@ pub struct AnyManifest {
 }
 
 #[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
+pub struct UpdateBody {
+    pub spec: AnySpec,
+    #[serde(flatten)]
+    pub _other: serde_json::Value,
+}
+
+#[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
 pub struct AnyList<I> {
     #[serde(flatten)]
     pub type_meta: CommonMeta,
