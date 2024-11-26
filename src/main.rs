@@ -37,12 +37,33 @@ async fn main() -> anyhow::Result<()> {
         .nest("/openapi", controller::openapi::router())
         .with_state(app);
 
-    let listen_addr = std::env::var("LISTEN_ADDR").unwrap_or_else(|_| String::from("127.0.0.1:8080"));
-    axum::serve(
-        tokio::net::TcpListener::bind(listen_addr).await?,
-        router.into_make_service(),
-    )
-    .await?;
+    let listen_addr =
+        std::env::var("LISTEN_ADDR").unwrap_or_else(|_| String::from("127.0.0.1:8080"));
+
+    let is_ssl = std::env::var("HTTP_LISTEN_SSL")
+        .unwrap_or_else(|_| String::from("off"))
+        .to_lowercase()
+        == "on";
+
+    if is_ssl {
+        let cert = std::env::var("HTTP_LISTEN_SSL_CERT")
+            .unwrap_or_else(|_| String::from("./server-cert.pem"));
+        let key = std::env::var("HTTP_LISTEN_SSL_KEY")
+            .unwrap_or_else(|_| String::from("./server-key.pem"));
+
+        rustls::crypto::aws_lc_rs::default_provider()
+            .install_default()
+            .map_err(|err| anyhow::anyhow!("Unable to install default CryptoProvider {err:?}"))?;
+
+        let rustls_config = axum_server::tls_rustls::RustlsConfig::from_pem_file(cert, key).await?;
+        axum_server::bind_rustls(listen_addr.parse()?, rustls_config)
+            .serve(router.into_make_service())
+            .await?;
+    } else {
+        axum_server::bind(listen_addr.parse()?)
+            .serve(router.into_make_service())
+            .await?;
+    }
 
     Ok(())
 }

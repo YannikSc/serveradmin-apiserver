@@ -24,6 +24,8 @@ serde-inline-default = "0.2"
 utoipa = "5.2"
 clap = "4.5"
 serde_yml = "0.0.12"
+axum-server = { version = "0.7", features = ["tls-rustls"] }
+rustls = "0.23"
 
 [features]
 # Allows storing metadata.labels and metadata.annotations in serveradmin attributes

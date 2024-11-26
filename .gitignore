@@ -1,2 +1,4 @@
 /target
 test.kubeconfig
+server-cert.pem
+server-key.pem
