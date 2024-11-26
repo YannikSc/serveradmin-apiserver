@@ -52,7 +52,7 @@ impl ServeradminDataApi {
         request: &RequestContext,
         type_meta: &CommonMeta,
         metadata: &CommonMetadata,
-    ) -> anyhow::Result<Server<Dataset>> {
+    ) -> anyhow::Result<Option<Server<Dataset>>> {
         let servertype = self.sa_converter.kind_to_servertype(&type_meta.kind);
         let attributes = self
             .sa_converter
@@ -73,7 +73,7 @@ impl ServeradminDataApi {
 
         let response = self.query(query.build(), config).await?;
 
-        Ok(response.one()?)
+        Ok(response.all().pop())
     }
 
     pub async fn create_resource(
@@ -113,7 +113,10 @@ impl ServeradminDataApi {
             return Err(anyhow::anyhow!("{}", commit.message.unwrap_or_default()));
         }
 
-        self.get_resource(request, type_meta, metadata).await
+        Ok(self
+            .get_resource(request, type_meta, metadata)
+            .await?
+            .ok_or(anyhow::anyhow!("Unable to get resource"))?)
     }
 
     pub async fn update_resource(
@@ -122,12 +125,14 @@ impl ServeradminDataApi {
         type_meta: &CommonMeta,
         metadata: &CommonMetadata,
         spec: &AnySpec,
-    ) -> anyhow::Result<Server<Dataset>> {
+    ) -> anyhow::Result<Option<Server<Dataset>>> {
         let mut config = Config::build_from_environment()?;
         config.ssh_signer = None;
         config.auth_token = Some(request.token.clone());
 
-        let server = self.get_resource(request, type_meta, metadata).await?;
+        let Some(server) = self.get_resource(request, type_meta, metadata).await? else {
+            return Ok(None);
+        };
         let server = self.update_server_from_data(server, spec.clone())?;
         #[cfg(feature = "advanced_metadata_storage")]
         let server = self.update_server_metadata(server, metadata.clone())?;

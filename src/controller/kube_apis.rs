@@ -183,7 +183,8 @@ async fn get_resource(
     };
     let type_meta = app.kube_converter.servertype_to_common_meta(&servertype);
 
-    app.data_api
+    match app
+        .data_api
         .get_resource(
             &ctx,
             &type_meta,
@@ -194,16 +195,31 @@ async fn get_resource(
             },
         )
         .await
-        .and_then(|server| app.kube_converter.server_to_manifest(server))
-        .map_err(|err| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                app.kube_converter.error_status_response(503, err),
-            )
-                .into_response()
-        })
-        .map(Json)
-        .map(IntoResponse::into_response)
+    {
+        Ok(Some(server)) => app
+            .kube_converter
+            .server_to_manifest(server)
+            .map_err(|err| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    app.kube_converter.error_status_response(503, err),
+                )
+                    .into_response()
+            })
+            .map(Json)
+            .map(IntoResponse::into_response),
+        Ok(None) => Ok((
+            StatusCode::NOT_FOUND,
+            app.kube_converter
+                .error_status_response(404, "No object found"),
+        )
+            .into_response()),
+        Err(err) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            app.kube_converter.error_status_response(503, err),
+        )
+            .into_response()),
+    }
 }
 
 #[axum::debug_handler]
@@ -309,19 +325,35 @@ async fn update_resource(
         name: hostname.clone(),
         ..Default::default()
     };
-    app.data_api
+    match app
+        .data_api
         .update_resource(&ctx, &type_meta, &metadata, &spec)
         .await
-        .and_then(|server| app.kube_converter.server_to_manifest(server))
-        .map_err(|err| {
-            (
-                StatusCode::INTERNAL_SERVER_ERROR,
-                app.kube_converter.error_status_response(503, err),
-            )
-                .into_response()
-        })
-        .map(Json)
-        .map(IntoResponse::into_response)
+    {
+        Ok(Some(server)) => app
+            .kube_converter
+            .server_to_manifest(server)
+            .map_err(|err| {
+                (
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    app.kube_converter.error_status_response(503, err),
+                )
+                    .into_response()
+            })
+            .map(Json)
+            .map(IntoResponse::into_response),
+        Ok(None) => Ok((
+            StatusCode::NOT_FOUND,
+            app.kube_converter
+                .error_status_response(404, "No object found"),
+        )
+            .into_response()),
+        Err(err) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            app.kube_converter.error_status_response(503, err),
+        )
+            .into_response()),
+    }
 }
 
 #[axum::debug_handler]

@@ -26,9 +26,9 @@ pub struct CommonMetadata {
     pub name: String,
     #[serde(skip_serializing_if = "String::is_empty")]
     pub namespace: String,
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    #[serde(skip_serializing_if = "HashMap::is_empty", default)]
     pub labels: HashMap<String, LabelValue>,
-    #[serde(skip_serializing_if = "HashMap::is_empty")]
+    #[serde(skip_serializing_if = "HashMap::is_empty", default)]
     pub annotations: HashMap<String, LabelValue>,
     #[serde(flatten, default)]
     pub _other: serde_json::Value,
