@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use convert_case::{Case, Casing};
-use raw_csv::RawAttribute;
+use raw_csv::{RawAttribute, RawServertypeAttribute};
 
 pub const SERVERTYPES: &str = include_str!("../../resources/servertypes.csv");
 pub const ATTRIBUTES: &str = include_str!("../../resources/attributes.csv");
@@ -39,6 +39,7 @@ mod raw_csv {
 #[derive(Clone)]
 pub struct ServertypeBuilder {
     pub servertypes: HashMap<String, Servertype>,
+    pub attributes: Vec<Attribute>,
 }
 
 #[derive(Clone, Debug)]
@@ -66,7 +67,7 @@ pub enum AttributeType {
 #[derive(Clone, Debug)]
 pub struct Attribute {
     pub name: String,
-    pub r#type: AttributeType,
+    pub typ: AttributeType,
     pub reversed_attribute_id: String,
     pub multi: bool,
     pub regexp: String,
@@ -74,6 +75,45 @@ pub struct Attribute {
     pub hovertext: String,
     pub required: bool,
     pub default: String,
+}
+
+impl Attribute {
+    fn from_raw(
+        raw_attr: &RawAttribute,
+        attributes: &HashMap<String, RawAttribute>,
+        relation: Option<&RawServertypeAttribute>,
+    ) -> Self {
+        let mut typ = raw_attr.r#type.clone();
+
+        if raw_attr.r#type == AttributeType::Reverse {
+            if let Some(attr) = attributes.get(&raw_attr.reversed_attribute_id) {
+                typ = attr.r#type.clone();
+            } else {
+                log::error!(
+                    "Unable to find item {} for reverse in {}",
+                    raw_attr.reversed_attribute_id,
+                    raw_attr.attribute_id
+                );
+            };
+        }
+
+        Attribute {
+            name: raw_attr.attribute_id.clone(),
+            typ,
+            reversed_attribute_id: raw_attr.reversed_attribute_id.clone(),
+            multi: raw_attr.multi,
+            regexp: raw_attr.regexp.clone(),
+            readonly: raw_attr.readonly,
+            hovertext: raw_attr.hovertext.clone(),
+            required: relation
+                .as_ref()
+                .map(|relation| relation.required)
+                .unwrap_or_default(),
+            default: relation
+                .map(|relation| relation.default_value.clone())
+                .unwrap_or_default(),
+        }
+    }
 }
 
 impl ServertypeBuilder {
@@ -200,33 +240,7 @@ impl ServertypeBuilder {
                         return None;
                     };
 
-                    let mut typ = raw_attr.r#type.clone();
-
-                    if raw_attr.r#type == AttributeType::Reverse {
-                        let Some(attr) = attributes.get(&raw_attr.reversed_attribute_id) else {
-                            log::error!(
-                                "Unable to find item {} for reverse in {}",
-                                raw_attr.reversed_attribute_id,
-                                raw_attr.attribute_id
-                            );
-
-                            return None;
-                        };
-
-                        typ = attr.r#type.clone();
-                    }
-
-                    Some(Attribute {
-                        name: raw_attr.attribute_id.clone(),
-                        r#type: typ,
-                        reversed_attribute_id: raw_attr.reversed_attribute_id.clone(),
-                        multi: raw_attr.multi,
-                        regexp: raw_attr.regexp.clone(),
-                        readonly: raw_attr.readonly,
-                        hovertext: raw_attr.hovertext.clone(),
-                        required: attr.required,
-                        default: attr.default_value.clone(),
-                    })
+                    Some(Attribute::from_raw(raw_attr, &attributes, Some(attr)))
                 })
                 .collect::<Vec<_>>();
 
@@ -239,8 +253,14 @@ impl ServertypeBuilder {
             );
         }
 
+        let attributes = attributes
+            .iter()
+            .map(|(_name, raw_attr)| Attribute::from_raw(raw_attr, &attributes, None))
+            .collect::<Vec<_>>();
+
         Ok(Self {
             servertypes: structured_servertypes,
+            attributes,
         })
     }
 
@@ -304,6 +324,41 @@ impl ServertypeBuilder {
 
         Ok(reader.deserialize().collect::<csv::Result<_>>()?)
     }
+
+    fn get_attributes_code(&self) -> Vec<String> {
+        self.attributes
+            .iter()
+            .map(Self::get_attribute_code)
+            .collect()
+    }
+
+    fn get_attribute_code(
+        Attribute {
+            name,
+            typ,
+            reversed_attribute_id,
+            multi,
+            regexp,
+            readonly,
+            hovertext,
+            required,
+            default,
+        }: &Attribute,
+    ) -> String {
+        format!(
+            r#"Attribute {{
+name: {name:?}.to_string(),
+typ: {typ:?},
+reversed_attribute_id: {reversed_attribute_id:?}.to_string(),
+multi: {multi:?},
+regexp: {regexp:?}.to_string(),
+readonly: {readonly:?},
+hovertext: {hovertext:?}.to_string(),
+required: {required:?},
+default: {default:?}.to_string(),
+}}"#
+        )
+    }
 }
 
 fn create_servertype_spec_struct(servertype: &Servertype) -> String {
@@ -311,7 +366,7 @@ fn create_servertype_spec_struct(servertype: &Servertype) -> String {
     let mut struc = format!("#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, utoipa::ToSchema)]\n#[schema(as = serveradmin::innogames::de::v1::{struc_name})]\n#[serde_inline_default::serde_inline_default]\n#[serde(rename_all = \"snake_case\")]\npub struct {struc_name} {{\n");
 
     for attr in &servertype.attributes {
-        let rust_type = match attr.r#type {
+        let rust_type = match attr.typ {
             AttributeType::Number => "i32",
             AttributeType::Boolean => "bool",
             _ => "String",
@@ -498,8 +553,8 @@ fn create_servertype_attributes(servertype: &Servertype) -> String {
         .iter()
         .map(|attribute| {
             format!(
-                r#"vec.push(Attribute {{ name: "{}".to_string() }});"#,
-                attribute.name
+                r#"vec.push({});"#,
+                ServertypeBuilder::get_attribute_code(attribute)
             )
         })
         .collect::<String>();
@@ -542,6 +597,30 @@ pub fn main() -> anyhow::Result<()> {
             #[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
             pub struct Attribute {
                 pub name: String,
+                pub typ: AttributeType,
+                pub reversed_attribute_id: String,
+                pub multi: bool,
+                pub regexp: String,
+                pub readonly: bool,
+                pub hovertext: String,
+                pub required: bool,
+                pub default: String,
+            }
+
+            #[derive(Clone, Debug, serde::Deserialize, PartialEq, serde::Serialize)]
+            #[serde(rename_all = "snake_case")]
+            pub enum AttributeType {
+                Domain,
+                Date,
+                Number,
+                Inet,
+                Supernet,
+                Macaddr,
+                Boolean,
+                Relation,
+                String,
+                Datetime,
+                Reverse,
             }
         }
         .to_string(),
@@ -584,12 +663,20 @@ utoipa::openapi::OpenApi::builder()
     structs.push(format!(
         r#"pub fn servertypes() -> std::collections::HashMap<String, Vec<Attribute>> {{
         let mut servertypes = std::collections::HashMap::new();
+        use AttributeType::*;
 
         {}
 
         servertypes
+}}
+
+pub  fn attributes() -> Vec<Attribute> {{
+    use AttributeType::*;
+
+    vec![{}]
 }}"#,
-        servertype_attributes.join("\n")
+        servertype_attributes.join("\n"),
+        converter.get_attributes_code().join(","),
     ));
 
     let structs = structs.join("\n");

@@ -12,15 +12,23 @@ impl<'a> PredefinedColumn<'a> {
     }
 }
 
-const VISIBLE_ATTRIBUTES: &[(&str, &[PredefinedColumn])] = &[
+pub const DEFAULT_ATTRIBUTES: &[PredefinedColumn] = &[
+    PredefinedColumn::Always("hostname"),
+    PredefinedColumn::Always("servertype"),
+    PredefinedColumn::Always("state"),
+    PredefinedColumn::Detailed("intern_ip"),
+    PredefinedColumn::Detailed("primary_ip6"),
+];
+
+pub const VISIBLE_ATTRIBUTES: &[(&str, &[PredefinedColumn])] = &[
     (
-        "vm",
+        "VM",
         &[
             PredefinedColumn::Always("hostname"),
             PredefinedColumn::Always("state"),
             PredefinedColumn::Always("ipv6"),
             PredefinedColumn::Always("ipv4"),
-            PredefinedColumn::Always("hypervisor"),
+            PredefinedColumn::Detailed("hypervisor"),
             PredefinedColumn::Detailed("service_groups"),
             PredefinedColumn::Detailed("loadbalancer"),
             PredefinedColumn::Detailed("route_network"),
@@ -28,7 +36,7 @@ const VISIBLE_ATTRIBUTES: &[(&str, &[PredefinedColumn])] = &[
         ],
     ),
     (
-        "service_group",
+        "ServiceGroup",
         &[
             PredefinedColumn::Always("hostname"),
             PredefinedColumn::Always("state"),
@@ -38,7 +46,7 @@ const VISIBLE_ATTRIBUTES: &[(&str, &[PredefinedColumn])] = &[
         ],
     ),
     (
-        "loadbalancer",
+        "Loadbalancer",
         &[
             PredefinedColumn::Always("hostname"),
             PredefinedColumn::Always("state"),

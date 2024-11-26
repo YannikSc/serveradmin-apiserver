@@ -80,6 +80,12 @@ pub struct TableColumnDefinition {
     pub priority: i32,
     #[serde(skip)]
     pub attribute_id: String,
+    pub cell_content: Option<CellContent>,
+}
+
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize)]
+pub enum CellContent {
+    Pointer(String),
 }
 
 #[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize)]
@@ -118,10 +124,21 @@ pub struct MetaTable<T> {
     pub rows: Vec<TableRow<T>>,
 }
 
+impl CellContent {
+    pub fn extract_cell_value(&self, row: &serde_json::Value) -> serde_json::Value {
+        match self {
+            CellContent::Pointer(pointer) => row
+                .pointer(pointer)
+                .cloned()
+                .unwrap_or_else(|| serde_json::Value::String("N/A".to_string())),
+        }
+    }
+}
+
 impl<T: serde::Serialize> MetaTable<T> {
     pub fn try_new(
         columns: Vec<TableColumnDefinition>,
-        cells: Vec<String>,
+        cells: Vec<CellContent>,
         items: Vec<T>,
     ) -> anyhow::Result<Self> {
         Ok(Self {
@@ -139,12 +156,7 @@ impl<T: serde::Serialize> MetaTable<T> {
                     Ok(TableRow {
                         cells: cells
                             .iter()
-                            .map(|cell| {
-                                object_data
-                                    .pointer(cell)
-                                    .cloned()
-                                    .unwrap_or_else(|| serde_json::Value::String(cell.to_string()))
-                            })
+                            .map(|cell| cell.extract_cell_value(&object_data))
                             .collect::<Vec<_>>(),
                         conditions: vec![],
                         object: item,

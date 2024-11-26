@@ -58,7 +58,7 @@ async fn list_namespaces(
     if accept.is_table() {
         return Ok(app
             .kube_converter
-            .servers_to_metatable(servers)
+            .servers_to_metatable(servers, "Namespace")
             .map_err(|err| {
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -134,7 +134,7 @@ async fn list_resources(
     if accept.is_table() {
         return Ok(app
             .kube_converter
-            .servers_to_metatable(servers)
+            .servers_to_metatable(servers, &type_meta.kind)
             .map_err(|err| {
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -436,8 +436,8 @@ async fn get_serveradmin_api_group() -> Json<serde_json::Value> {
 }
 
 #[axum::debug_handler]
-async fn get_serveradmin_api_resources() -> Json<serde_json::Value> {
-    Json(serde_json::Value::Null)
+async fn get_serveradmin_api_resources(app: State<App>) -> Json<serde_json::Value> {
+    Json(app.kube_converter.get_api_resources())
 }
 
 pub fn router() -> axum::Router<crate::App> {

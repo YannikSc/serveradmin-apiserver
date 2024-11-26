@@ -10,10 +10,8 @@ pub struct ServeradminConverter {
 }
 
 impl ServeradminConverter {
-    pub fn new(servertypes: HashMap<String, Vec<Attribute>>) -> Self {
-        Self {
-            servertypes: Arc::new(servertypes),
-        }
+    pub fn new(servertypes: Arc<HashMap<String, Vec<Attribute>>>) -> Self {
+        Self { servertypes }
     }
 
     pub fn plural_to_servertype(&self, plural: &str) -> Option<String> {

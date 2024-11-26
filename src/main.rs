@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use service::{
     kube_converter::KubeConverter, serveradmin_converter::ServeradminConverter,
     serveradmin_data_api::ServeradminDataApi,
@@ -18,10 +20,14 @@ pub struct App {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let sa_converter = ServeradminConverter::new(crate::api::servertypes::servertypes());
+    let servertypes = Arc::new(crate::api::servertypes::servertypes());
+    let sa_converter = ServeradminConverter::new(servertypes.clone());
     let app = App {
         serveradmin_converter: sa_converter.clone(),
-        kube_converter: KubeConverter {},
+        kube_converter: KubeConverter {
+            attributes: Arc::new(api::servertypes::attributes()),
+            servertypes,
+        },
         data_api: ServeradminDataApi { sa_converter },
         openapi_definition: crate::api::servertypes::openapi(),
     };

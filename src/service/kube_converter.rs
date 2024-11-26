@@ -1,13 +1,74 @@
+use std::{collections::HashMap, sync::Arc};
+
 use adminapi::api::Server;
 use axum::Json;
 use convert_case::{Case, Casing};
 
-use crate::api::kube_common::{AnyList, AnyManifest, CommonMeta, CommonMetadata, MetaTable};
+use crate::api::{
+    kube_common::{
+        AnyList, AnyManifest, CellContent, CommonMeta, CommonMetadata, MetaTable,
+        TableColumnDefinition, TableColumnFormat, TableColumnType,
+    },
+    serveradmin_common::{PredefinedColumn, DEFAULT_ATTRIBUTES, VISIBLE_ATTRIBUTES},
+    servertypes::{Attribute, AttributeType},
+};
 
 #[derive(Clone)]
-pub struct KubeConverter {}
+pub struct KubeConverter {
+    pub attributes: Arc<Vec<Attribute>>,
+    pub servertypes: Arc<HashMap<String, Vec<Attribute>>>,
+}
 
 impl KubeConverter {
+    pub fn get_api_resources(&self) -> serde_json::Value {
+        use convert_case::{Case, Casing};
+
+        let resources = self
+            .servertypes
+            .iter()
+            .map(|(servertype, attributes)| {
+                let name = servertype.to_case(Case::Flat) + "s";
+                let singular_name = servertype.to_case(Case::Flat);
+                let kind = servertype.to_case(Case::Pascal);
+                let namespaced = attributes
+                    .iter()
+                    .find(|attr| attr.name.eq("project"))
+                    .is_some();
+                let mut title = servertype.split("_");
+                let mut short_name = String::new();
+                while let Some(word) = title.next() {
+                    if let Some(char) = word.chars().next() {
+                        short_name.push(char);
+                    }
+                }
+
+                let mut short_names = Vec::new();
+
+                if short_name.len() > 1 {
+                    short_names.push(short_name);
+                }
+
+                serde_json::json! {{
+                    "name": name,
+                    "singularName": singular_name,
+                    "namespaced": namespaced,
+                    "kind": kind,
+                    "verbs": [
+                        "get"
+                    ],
+                    "shortNames": short_names,
+                }}
+            })
+            .collect::<Vec<_>>();
+
+        serde_json::json! {{
+            "kind": "APIResourceList",
+            "apiVersion": "v1",
+            "groupVersion": "serveradmin.innogames.de/v1",
+            "resources": resources,
+        }}
+    }
+
     pub fn servertype_to_common_meta(&self, servertype: &str) -> CommonMeta {
         CommonMeta {
             api_version: "serveradmin.innogames.de/v1".to_string(),
@@ -18,13 +79,27 @@ impl KubeConverter {
     pub fn servers_to_metatable(
         &self,
         servers: Vec<Server>,
+        kind: &str,
     ) -> anyhow::Result<MetaTable<AnyManifest>> {
         let servers = servers
             .into_iter()
             .map(|server| self.server_to_manifest(server))
             .collect::<anyhow::Result<Vec<_>>>()?;
 
-        MetaTable::try_new(vec![], vec![], servers)
+        let columns = self.get_column_definitions(kind)?;
+        let values = columns
+            .iter()
+            .map(|column| {
+                column
+                    .cell_content
+                    .clone()
+                    .unwrap_or(CellContent::Pointer(format!(
+                        "/spec/{}",
+                        column.attribute_id
+                    )))
+            })
+            .collect();
+        MetaTable::try_new(columns, values, servers)
     }
 
     pub fn servers_to_list(
@@ -87,5 +162,76 @@ impl KubeConverter {
             "reason": "Invalid",
             "status": "Failure",
         }})
+    }
+
+    fn get_column_definitions(&self, kind: &str) -> anyhow::Result<Vec<TableColumnDefinition>> {
+        let visible_columns = VISIBLE_ATTRIBUTES
+            .iter()
+            .find(|(name, _)| name.eq(&kind))
+            .map(|(_, cols)| *cols)
+            .unwrap_or(DEFAULT_ATTRIBUTES);
+        let mut columns = Vec::new();
+
+        for column in visible_columns.iter() {
+            let Some(attribute) = self
+                .attributes
+                .iter()
+                .find(|attr| attr.name.eq(&column.get_name()))
+            else {
+                log::error!(
+                    "Unable to find attribute for predefined column {}",
+                    column.get_name()
+                );
+
+                continue;
+            };
+
+            let priority = match column {
+                PredefinedColumn::Always(_) => 0,
+                PredefinedColumn::Detailed(_) => 1,
+            };
+
+            let name = column.get_name();
+            columns.push(
+                self.get_column_definition_for_column(attribute, priority)
+                    .ok_or(anyhow::anyhow!(
+                        "Unable to resolve table column from attribute {name}"
+                    ))?,
+            );
+        }
+
+        return Ok(columns);
+    }
+
+    fn get_column_definition_for_column(
+        &self,
+        attribute: &Attribute,
+        priority: i32,
+    ) -> Option<TableColumnDefinition> {
+        use convert_case::{Case, Casing};
+
+        let typ = match attribute.typ {
+            AttributeType::Boolean => TableColumnType::Boolean,
+            AttributeType::Date | AttributeType::Datetime => TableColumnType::Date,
+            AttributeType::Number => TableColumnType::Number,
+            _ => TableColumnType::String,
+        };
+
+        let format = match attribute.typ {
+            AttributeType::Number => Some(TableColumnFormat::Int64),
+            AttributeType::Date => Some(TableColumnFormat::Date),
+            AttributeType::Datetime => Some(TableColumnFormat::DateTime),
+            _ => None,
+        };
+
+        Some(TableColumnDefinition {
+            name: attribute.name.to_case(Case::Pascal),
+            r#type: typ,
+            description: attribute.hovertext.clone(),
+            format,
+            priority,
+            attribute_id: attribute.name.clone(),
+            ..Default::default()
+        })
     }
 }
