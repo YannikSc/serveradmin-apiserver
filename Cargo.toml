@@ -19,3 +19,8 @@ convert_case = "0.6"
 serde-inline-default = "0.2"
 utoipa = "5.2"
 clap = "4.5"
+serde_yml = "0.0.12"
+
+[features]
+# Allows storing metadata.labels and metadata.annotations in serveradmin attributes
+advanced_metadata_storage = []

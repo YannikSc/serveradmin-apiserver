@@ -13,6 +13,9 @@ use crate::api::{
     servertypes::{Attribute, AttributeType},
 };
 
+#[cfg(feature = "advanced_metadata_storage")]
+use super::serveradmin_data_api::from_key_value;
+
 #[derive(Clone)]
 pub struct KubeConverter {
     pub attributes: Arc<Vec<Attribute>>,
@@ -134,11 +137,24 @@ impl KubeConverter {
         let project = server.get("project");
         let project = project.as_str().unwrap_or_default();
 
+        #[cfg(feature = "advanced_metadata_storage")]
+        let labels = serde_json::from_value::<Vec<String>>(server.get("labels"))
+            .map(from_key_value)
+            .unwrap_or_default();
+        #[cfg(feature = "advanced_metadata_storage")]
+        let annotations = serde_json::from_value::<Vec<String>>(server.get("annotations"))
+            .map(from_key_value)
+            .unwrap_or_default();
+
         Ok(AnyManifest {
             type_meta: self.servertype_to_common_meta(&servertype),
             metadata: CommonMetadata {
                 name: hostname,
                 namespace: project.to_string(),
+                #[cfg(feature = "advanced_metadata_storage")]
+                labels,
+                #[cfg(feature = "advanced_metadata_storage")]
+                annotations,
                 ..Default::default()
             },
             spec: serde_json::from_value(serde_json::to_value(&server.attributes)?)?,

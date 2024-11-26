@@ -1,6 +1,15 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, convert::Infallible, str::FromStr};
 
 pub type AnySpec = HashMap<String, serde_json::Value>;
+
+#[derive(Clone, Debug, serde::Deserialize, serde::Serialize, PartialEq)]
+#[serde(untagged)]
+pub enum LabelValue {
+    Integer(i32),
+    Float(f32),
+    Bool(bool),
+    String(String),
+}
 
 #[derive(Clone, Debug, Default, serde::Deserialize, serde::Serialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -18,9 +27,9 @@ pub struct CommonMetadata {
     #[serde(skip_serializing_if = "String::is_empty")]
     pub namespace: String,
     #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub labels: HashMap<String, serde_json::Value>,
+    pub labels: HashMap<String, LabelValue>,
     #[serde(skip_serializing_if = "HashMap::is_empty")]
-    pub annotations: HashMap<String, serde_json::Value>,
+    pub annotations: HashMap<String, LabelValue>,
     #[serde(flatten, default)]
     pub _other: serde_json::Value,
 }
@@ -173,5 +182,20 @@ impl CommonMeta {
             api_version: "serveradmin.innogames.de/v1".to_string(),
             kind: kind.to_string(),
         }
+    }
+}
+
+impl FromStr for LabelValue {
+    type Err = Infallible;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        let value = value
+            .parse::<i32>()
+            .map(Self::Integer)
+            .or_else(|_| value.parse::<f32>().map(Self::Float))
+            .or_else(|_| value.parse::<bool>().map(Self::Bool))
+            .unwrap_or_else(|_| Self::String(value.to_string()));
+
+        Ok(value)
     }
 }

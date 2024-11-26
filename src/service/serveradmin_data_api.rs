@@ -87,6 +87,21 @@ impl ServeradminDataApi {
         let object = self
             .new_object(&servertype, metadata.clone(), spec.clone(), config.clone())
             .await?;
+
+        #[cfg(feature = "advanced_metadata_storage")]
+        let mut object = object;
+
+        #[cfg(feature = "advanced_metadata_storage")]
+        {
+            to_key_value(&metadata.labels)
+                .into_iter()
+                .map(|item| object.add("labels", item).map(|_| ()))
+                .collect::<anyhow::Result<Vec<()>>>()?;
+            to_key_value(&metadata.annotations)
+                .into_iter()
+                .map(|item| object.add("annotations", item).map(|_| ()))
+                .collect::<anyhow::Result<Vec<()>>>()?;
+        }
         let (commit, _) = object.get_commit();
         let commit = self.commit(&commit, config).await?;
 
@@ -110,6 +125,8 @@ impl ServeradminDataApi {
 
         let server = self.get_resource(request, type_meta, metadata).await?;
         let server = self.update_server_from_data(server, spec.clone())?;
+        #[cfg(feature = "advanced_metadata_storage")]
+        let server = self.update_server_metadata(server, metadata.clone())?;
         let commit = Commit::new().update(server.changeset());
         let commit = self.commit(&commit, config).await?;
 
@@ -227,4 +244,97 @@ impl ServeradminDataApi {
 
         Ok(server)
     }
+
+    #[cfg(feature = "advanced_metadata_storage")]
+    fn update_server_metadata(
+        &self,
+        mut server: Server,
+        metadata: CommonMetadata,
+    ) -> anyhow::Result<Server> {
+        let server_labels =
+            serde_json::from_value::<Vec<String>>(server.get("labels")).unwrap_or_default();
+        let server_annotations =
+            serde_json::from_value::<Vec<String>>(server.get("annotations")).unwrap_or_default();
+
+        let labels = to_key_value(&metadata.labels);
+        let annotations = to_key_value(&metadata.annotations);
+
+        for label in &labels {
+            if server_labels.contains(label) {
+                continue;
+            }
+
+            server.add("labels", label.clone())?;
+        }
+
+        for annotation in &annotations {
+            if server_annotations.contains(annotation) {
+                continue;
+            }
+
+            server.add("annotations", annotation.clone())?;
+        }
+
+        for label in &server_labels {
+            if !labels.contains(label) {
+                server.remove("labels", label.clone())?;
+            }
+        }
+
+        for annotation in &server_annotations {
+            if !annotations.contains(annotation) {
+                server.remove("annotations", annotation.clone())?;
+            }
+        }
+
+        Ok(server)
+    }
 }
+
+#[cfg(feature = "advanced_metadata_storage")]
+mod metadata_addons {
+    use std::{collections::HashMap, str::FromStr};
+
+    use crate::api::kube_common::LabelValue;
+
+    pub fn to_key_value(map: &HashMap<String, LabelValue>) -> Vec<String> {
+        let mut mappings = Vec::new();
+
+        for (name, value) in map {
+            let value = match value {
+                LabelValue::Integer(val) => val.to_string(),
+                LabelValue::Float(val) => val.to_string(),
+                LabelValue::Bool(val) => val.to_string(),
+                LabelValue::String(val) => val.clone(),
+            };
+
+            mappings.push(format!("{name}={value}"));
+        }
+
+        mappings
+    }
+
+    pub fn from_key_value(mappings: Vec<String>) -> HashMap<String, LabelValue> {
+        let mut map = HashMap::new();
+
+        for mapping in mappings {
+            let mut mapping = mapping.splitn(2, "=");
+            let name = mapping.next().map(ToString::to_string).unwrap_or_default();
+            let value = mapping.next().unwrap_or_default();
+            let value = LabelValue::from_str(value).unwrap();
+
+            if name.is_empty() {
+                log::error!("Found empty label mapping, skipping");
+
+                continue;
+            }
+
+            map.insert(name, value);
+        }
+
+        map
+    }
+}
+
+#[cfg(feature = "advanced_metadata_storage")]
+pub use metadata_addons::*;
