@@ -1,6 +1,7 @@
 use axum::{response::IntoResponse, routing::get, Json};
 
 #[axum::debug_handler]
+#[tracing::instrument]
 async fn openapi_v3() -> impl IntoResponse {
     Json(serde_json::json! {{
         "paths": {
@@ -12,12 +13,14 @@ async fn openapi_v3() -> impl IntoResponse {
 }
 
 #[axum::debug_handler]
+#[tracing::instrument]
 async fn openapi_v3_serveradmin_apis() -> impl IntoResponse {
     String::new()
 }
 
 /// Can respond empty but has to exist
 #[axum::debug_handler]
+#[tracing::instrument]
 async fn openapi_v2() -> impl IntoResponse {
     String::new()
 }

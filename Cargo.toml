@@ -14,8 +14,6 @@ anyhow = "1.0"
 futures = "0.3"
 tokio = { version = "1.37", features = ["full"] }
 adminapi = { git = "https://github.com/YannikSc/serveradmin.git" }
-env_logger = "0.11"
-log = "0.4"
 axum = { version = "0.7", features = ["macros"] }
 axum-macros = { version = "0.3.0-rc.3" }
 csv = "1.3"
@@ -26,7 +24,19 @@ clap = "4.5"
 serde_yml = "0.0.12"
 axum-server = { version = "0.7", features = ["tls-rustls"] }
 rustls = "0.23"
+tower-http = { version = "0.6", features = ["trace"], optional = true }
+axum-tracing-opentelemetry = { version = "0.24", optional = true }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing = "0.1.40"
 
 [features]
+default = ['trace']
+
 # Allows storing metadata.labels and metadata.annotations in serveradmin attributes
 advanced_metadata_storage = []
+
+# Exposes telemetry information using opentelemetry
+telemetry = ['axum-tracing-opentelemetry']
+
+# Logs tracing information for tower/axum
+trace = ['tower-http']

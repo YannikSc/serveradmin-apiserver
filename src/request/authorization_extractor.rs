@@ -6,6 +6,7 @@ use axum::{
 
 use crate::App;
 
+#[derive(Clone, Debug)]
 pub struct Authorization {
     pub token: String,
 }

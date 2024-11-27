@@ -89,7 +89,7 @@ impl Attribute {
             if let Some(attr) = attributes.get(&raw_attr.reversed_attribute_id) {
                 typ = attr.r#type.clone();
             } else {
-                log::error!(
+                tracing::error!(
                     "Unable to find item {} for reverse in {}",
                     raw_attr.reversed_attribute_id,
                     raw_attr.attribute_id
@@ -565,6 +565,10 @@ fn create_servertype_attributes(servertype: &Servertype) -> String {
 }
 
 pub fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     let converter = ServertypeBuilder::try_new(
         SERVERTYPES.to_string(),
         ATTRIBUTES.to_string(),

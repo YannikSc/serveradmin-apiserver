@@ -6,6 +6,7 @@ use axum::{
 
 use crate::App;
 
+#[derive(Clone, Debug)]
 pub struct Accept {
     pub content_type: String,
 }

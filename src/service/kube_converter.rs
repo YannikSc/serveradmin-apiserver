@@ -194,7 +194,7 @@ impl KubeConverter {
                 .iter()
                 .find(|attr| attr.name.eq(&column.get_name()))
             else {
-                log::error!(
+                tracing::error!(
                     "Unable to find attribute for predefined column {}",
                     column.get_name()
                 );

@@ -16,6 +16,7 @@ use crate::{
 };
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn list_namespaces(
     app: State<App>,
     accept: Accept,
@@ -79,6 +80,7 @@ async fn list_namespaces(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn list_resources(
     app: State<App>,
     accept: Accept,
@@ -155,6 +157,7 @@ async fn list_resources(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn list_unscoped_resources(
     app: State<App>,
     accept: Accept,
@@ -165,6 +168,7 @@ async fn list_unscoped_resources(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn get_resource(
     app: State<App>,
     authorization: Authorization,
@@ -223,6 +227,7 @@ async fn get_resource(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn get_unscoped_resource(
     app: State<App>,
     authorization: Authorization,
@@ -232,6 +237,7 @@ async fn get_unscoped_resource(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn create_resource(
     app: State<App>,
     authorization: Authorization,
@@ -292,6 +298,7 @@ async fn create_resource(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn create_unscoped_resource(
     app: State<App>,
     authorization: Authorization,
@@ -302,6 +309,7 @@ async fn create_unscoped_resource(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn update_resource(
     app: State<App>,
     authorization: Authorization,
@@ -357,6 +365,7 @@ async fn update_resource(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn update_unscoped_resource(
     app: State<App>,
     authorization: Authorization,
@@ -373,6 +382,7 @@ async fn update_unscoped_resource(
 }
 
 #[axum::debug_handler]
+#[tracing::instrument]
 async fn get_api() -> Json<serde_json::Value> {
     Json(serde_json::json! {{
         "kind": "APIVersions",
@@ -384,6 +394,7 @@ async fn get_api() -> Json<serde_json::Value> {
 }
 
 #[axum::debug_handler]
+#[tracing::instrument]
 async fn get_api_resources() -> Json<serde_json::Value> {
     Json(serde_json::json! {{
         "kind": "APIResourceList",
@@ -402,6 +413,7 @@ async fn get_api_resources() -> Json<serde_json::Value> {
 }
 
 #[axum::debug_handler]
+#[tracing::instrument]
 async fn get_apis() -> Json<serde_json::Value> {
     Json(serde_json::json! {{
         "kind": "APIGroupList",
@@ -427,6 +439,7 @@ async fn get_apis() -> Json<serde_json::Value> {
 }
 
 #[axum::debug_handler]
+#[tracing::instrument]
 async fn get_serveradmin_api_group() -> Json<serde_json::Value> {
     Json(serde_json::json! {{
         "kind": "APIGroup",
@@ -440,6 +453,7 @@ async fn get_serveradmin_api_group() -> Json<serde_json::Value> {
 }
 
 #[axum::debug_handler]
+#[tracing::instrument(skip(app))]
 async fn get_serveradmin_api_resources(app: State<App>) -> Json<serde_json::Value> {
     Json(app.kube_converter.get_api_resources())
 }

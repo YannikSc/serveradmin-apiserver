@@ -333,7 +333,7 @@ mod metadata_addons {
             let value = LabelValue::from_str(value).unwrap();
 
             if name.is_empty() {
-                log::error!("Found empty label mapping, skipping");
+                tracing::error!("Found empty label mapping, skipping");
 
                 continue;
             }

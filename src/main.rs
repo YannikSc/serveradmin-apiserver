@@ -20,6 +20,10 @@ pub struct App {
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .init();
+
     let servertypes = Arc::new(crate::api::servertypes::servertypes());
     let sa_converter = ServeradminConverter::new(servertypes.clone());
     let app = App {
@@ -36,6 +40,14 @@ async fn main() -> anyhow::Result<()> {
         .nest("/", controller::kube_apis::router())
         .nest("/openapi", controller::openapi::router())
         .with_state(app);
+
+    #[cfg(feature = "telemetry")]
+    let router = router
+        .layer(axum_tracing_opentelemetry::middleware::OtelInResponseLayer::default())
+        .layer(axum_tracing_opentelemetry::middleware::OtelAxumLayer::default());
+
+    #[cfg(feature = "trace")]
+    let router = router.layer(tower_http::trace::TraceLayer::new_for_http());
 
     let listen_addr =
         std::env::var("LISTEN_ADDR").unwrap_or_else(|_| String::from("127.0.0.1:8080"));
